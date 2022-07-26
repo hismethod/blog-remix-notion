@@ -1,17 +1,17 @@
 import { ActionIcon, AppShell, Container, Header, useMantineColorScheme } from "@mantine/core";
-import { Client } from "@notionhq/client";
 import { json, LoaderFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import Logo from "~/components/Logo";
-import { getBlogPosts, PageObject } from "~/server/api";
+import { getBlogPostInfoList } from "~/server/api";
+import type { PostInfo } from "~/server/model/post";
 
 export const loader: LoaderFunction = async () => {
-  const posts = await getBlogPosts();
+  const posts = await getBlogPostInfoList();
   return json({ posts });
 };
 
 type LoaderData = {
-  posts: PageObject[];
+  posts: PostInfo[];
 };
 
 export default function Index() {
@@ -38,7 +38,7 @@ function ArticleList() {
       <ul>
         {posts.map((page) => (
           <li key={page.id}>
-            <a href={page.id}>{page.id}</a>
+            <a href={page.url}>{page.title}</a>
           </li>
         ))}
       </ul>

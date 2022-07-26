@@ -1,12 +1,12 @@
 import { ActionIcon, AppShell, Container, Header, useMantineColorScheme } from "@mantine/core";
 import { json, LoaderFunction } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
 import Logo from "~/components/Logo";
 import { getBlogPostInfoList } from "~/server/api";
-import type { PostInfo } from "~/server/model/post";
+import { PostInfo } from "~/server/model/post";
 
 export const loader: LoaderFunction = async () => {
-  const posts = await getBlogPostInfoList();
+  const posts: PostInfo[] = await getBlogPostInfoList();
   return json({ posts });
 };
 
@@ -38,7 +38,7 @@ function ArticleList() {
       <ul>
         {posts.map((page) => (
           <li key={page.id}>
-            <a href={page.url}>{page.title}</a>
+            <Link to={`/post/${page.id}`}>{page.title}</Link>
           </li>
         ))}
       </ul>

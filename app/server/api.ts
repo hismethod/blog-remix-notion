@@ -1,7 +1,7 @@
-import { Client, isFullPage } from "@notionhq/client";
-import { PageObjectResponse, PartialPageObjectResponse, QueryDatabaseResponse, RichTextItemResponse, TextRichTextItemResponse, TitlePropertyItemObjectResponse } from "@notionhq/client/build/src/api-endpoints";
-import invariant from "tiny-invariant";
+import { Client, isFullBlock, isFullPage, iteratePaginatedAPI } from "@notionhq/client";
+import { BlockObjectResponse, TextRichTextItemResponse } from "@notionhq/client/build/src/api-endpoints";
 import { PostInfo } from "./model/post";
+import { findTitleKey } from "./notion.utils";
 const print = console.log;
 
 const [NOTION_OLD_VERSION, NOTION_LATEST_VERSION] = ["2022-02-22", "2022-06-28"];
@@ -51,15 +51,19 @@ export async function getBlogPostInfoList(): Promise<PostInfo[]> {
   return postInfoList;
 }
 
-function findTitleKey(properties?: Record<string, {
-  id: string;
-}>) {
-  if(properties != null) { 
-    for (const key in properties) {
-      if (properties[key].id === "title") {
-        return key;
-      }
-    }
+export async function getBlogPost(id: string) {
+  const notion = new Client({
+    auth: process.env.NOTION_API_TOKEN,
+    notionVersion: NOTION_LATEST_VERSION,
+  });
+
+  let blocks: BlockObjectResponse[] = [];
+  for await (const block of iteratePaginatedAPI(notion.blocks.children.list, {
+    block_id: id,
+  })) {
+    if(!isFullBlock(block)) continue;
+    blocks.push(block);
   }
-  return "이름";
+  console.log(blocks.length)
+  return blocks;
 }

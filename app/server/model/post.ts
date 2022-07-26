@@ -5,3 +5,7 @@ export interface PostInfo {
   created_at: Date;
   updated_at: Date;
 }
+
+export interface PostPage {
+  info: PostInfo;
+}

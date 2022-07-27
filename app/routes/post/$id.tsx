@@ -1,14 +1,22 @@
 import { Container } from "@mantine/core";
-import { BlockObjectResponse } from "@notionhq/client/build/src/api-endpoints";
+import { BlockObjectResponse, PartialBlockObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import { json, LoaderFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { Callout, H1, H2, H3, Paragraph } from "~/components/notion/Block";
+import { Block, RenderBlocks } from "~/components/notion/Block";
 import { getBlogPost } from "~/server/api";
+import cache from "~/server/cache";
 
 export const loader: LoaderFunction = async ({ params }) => {
   const id = params.id as string;
-  const blocks = await getBlogPost(id);
-  return json({ blocks });
+
+  let cachedBlocks = cache.get<LoaderData>(id);
+  if (cachedBlocks === undefined) {
+    console.log("cached blocks not found");
+    const blocks = await getBlogPost(id);
+    cachedBlocks = { blocks };
+    cache.set(id, cachedBlocks);
+  }
+  return json(cachedBlocks);
 };
 
 type LoaderData = {
@@ -16,27 +24,11 @@ type LoaderData = {
 };
 
 export default function Post() {
-  const { blocks } = useLoaderData() as LoaderData;
+  const { blocks } = useLoaderData<LoaderData>();
   return (
     <Container>
       <h1>Post</h1>
-      {blocks.map((block) => Block(block))}
+      <RenderBlocks blocks={blocks}></RenderBlocks>
     </Container>
   );
-}
-
-export function Block(block: BlockObjectResponse) {
-  if (block.type === "paragraph") {
-    return <Paragraph block={block} />;
-  } else if (block.type === "heading_1") {
-    return <H1 block={block} />;
-  } else if (block.type === "heading_2") {
-    return <H2 block={block} />;
-  } else if (block.type === "heading_3") {
-    return <H3 block={block} />;
-  } else if (block.type === "callout") {
-    return <Callout block={block} />;
-  } else {
-    return <p>{block.type}</p>;
-  }
 }

@@ -1,72 +1,129 @@
+import { Blockquote, Code, Divider } from "@mantine/core";
 import {
+  BlockObjectResponse,
   CalloutBlockObjectResponse,
+  CodeBlockObjectResponse,
+  DividerBlockObjectResponse,
   Heading1BlockObjectResponse,
   Heading2BlockObjectResponse,
   Heading3BlockObjectResponse,
+  NumberedListItemBlockObjectResponse,
   ParagraphBlockObjectResponse,
+  QuoteBlockObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints";
+import { RichText } from "./Text";
 
-type NotionParagraphProps = {
-  block: ParagraphBlockObjectResponse;
-};
-
-type NotionHeading1Props = {
-  block: Heading1BlockObjectResponse;
-};
-type NotionHeading2Props = {
-  block: Heading2BlockObjectResponse;
-};
-type NotionHeading3Props = {
-  block: Heading3BlockObjectResponse;
-};
-
-export const Paragraph = (props: NotionParagraphProps) => {
-  const { block } = props;
-
-  return <p>{block.paragraph.rich_text.map((p) => p.plain_text).join("\n")}</p>;
-};
-
-export const H1 = (props: NotionHeading1Props) => {
-  const { block } = props;
-  return <h1>{block.heading_1.rich_text.map((h) => h.text.content).join("\n")}</h1>;
-};
-
-export const H2 = (props: NotionHeading2Props) => {
-  const { block } = props;
-  return <h2>{block.heading_2.rich_text.map((h) => h.text.content).join("\n")}</h2>;
-};
-
-export const H3 = (props: NotionHeading3Props) => {
-  const { block } = props;
-  return <h3>{block.heading_3.rich_text.map((h) => h.text.content).join("\n")}</h3>;
-};
-
-type NotionCalloutProps = {
-  block: CalloutBlockObjectResponse;
-};
-
-export const Callout = (props: NotionCalloutProps) => {
-  const { block } = props;
-  let icon;
-  if (block.callout.icon?.type === "emoji") {
-    icon = Emoji({ emoji: block.callout.icon.emoji });
-  } else {
-    icon = <span>TODO!!! 구현필요</span>;
-  }
+export const RenderBlocks = ({ blocks }: { blocks: BlockObjectResponse[] }) => {
   return (
     <div>
-      {icon}
-      <p>{block.callout.rich_text.map((c) => c.text.content).join("\n")}</p>
+      {blocks.map((block) => {
+        let childrenBlock;
+        if (block.has_children) {
+          childrenBlock = block[block.type].children.map((childBlock) => <Block block={childBlock} />);
+        }
+
+        return (
+          <>
+            <Block block={block} />
+            <>{childrenBlock}</>
+          </>
+        );
+      })}
     </div>
   );
 };
 
-export const Icon = (props: NotionCalloutProps) => {};
+export const Block = ({ block }: { block: BlockObjectResponse }) => {
+  switch (block.type) {
+    case "paragraph":
+      return <NotionParagraph key={block.id} block={block} />;
+    case "heading_1":
+      return <NotionH1 key={block.id} block={block} />;
+    case "heading_2":
+      return <NotionH2 key={block.id} block={block} />;
+    case "heading_3":
+      return <NotionH3 key={block.id} block={block} />;
+    case "callout":
+      return <NotionCallout key={block.id} block={block} />;
+    case "quote":
+      return <NotionQuote key={block.id} block={block} />;
+    case "code":
+      return <NotionCode key={block.id} block={block} />;
+    case "divider":
+      return <NotionDivider key={block.id} block={block} />;
+    case "numbered_list_item":
+      return <NotionNumberedListItem block={block} />;
+    default:
+      return <p style={{ color: "red" }}>{block.type}</p>;
+  }
+};
 
-type EmojiProps = {
-  emoji: string;
+function NotionParagraph({ block }: { block: ParagraphBlockObjectResponse }) {
+  return (
+    <p>
+      <RichText richTextArray={block.paragraph.rich_text} />
+    </p>
+  );
+}
+
+const NotionH1 = ({ block }: { block: Heading1BlockObjectResponse }) => {
+  return <h1>{block.heading_1.rich_text.map((h) => h.plain_text).join("\n")}</h1>;
 };
-export const Emoji = (props: EmojiProps) => {
-  const { emoji } = props;
-  return <span>{emoji}</span>;
+
+const NotionH2 = ({ block }: { block: Heading2BlockObjectResponse }) => {
+  return <h2>{block.heading_2.rich_text.map((h) => h.plain_text).join("\n")}</h2>;
 };
+
+const NotionH3 = ({ block }: { block: Heading3BlockObjectResponse }) => {
+  return <h3>{block.heading_3.rich_text.map((h) => h.plain_text).join("\n")}</h3>;
+};
+
+function NotionCallout({ block }: { block: CalloutBlockObjectResponse }) {
+  let icon;
+  if (block.callout.icon?.type === "emoji") {
+    icon = <span>{block.callout.icon.emoji}</span>;
+  } else {
+    icon = <span>TODO!!! 이모지가 파일일때 구현필요</span>;
+  }
+
+  return (
+    <div>
+      {icon}
+      {block.callout.rich_text.map((c) => (
+        <p>{c.plain_text}</p>
+      ))}
+    </div>
+  );
+}
+
+function NotionQuote({ block }: { block: QuoteBlockObjectResponse }) {
+  return (
+    <Blockquote>
+      <RichText richTextArray={block.quote.rich_text}></RichText>
+    </Blockquote>
+  );
+}
+
+function NotionCode({ block }: { block: CodeBlockObjectResponse }) {
+  return (
+    <div>
+      <p>{block.code.language}</p>
+      <Code block>
+        <RichText richTextArray={block.code.rich_text} />
+        <caption>{block.code.caption}</caption>
+      </Code>
+    </div>
+  );
+}
+
+function NotionDivider({ block }: { block: DividerBlockObjectResponse }) {
+  return <Divider />;
+}
+
+function NotionNumberedListItem({ block }: { block: NumberedListItemBlockObjectResponse }) {
+  return (
+    <p>
+      <RichText richTextArray={block.numbered_list_item.rich_text} />
+    </p>
+  );
+}

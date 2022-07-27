@@ -8,4 +8,9 @@ export interface PostInfo {
 
 export interface PostPage {
   info: PostInfo;
+  content: ContentBlock[];
+}
+
+export interface ContentBlock {
+  id: string;
 }

@@ -3,11 +3,26 @@ import { json, LoaderFunction } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import Logo from "~/components/Logo";
 import { getBlogPostInfoList } from "~/server/api";
+import cache from "~/server/cache";
 import { PostInfo } from "~/server/model/post";
 
-export const loader: LoaderFunction = async () => {
-  const posts: PostInfo[] = await getBlogPostInfoList();
-  return json({ posts });
+export const loader: LoaderFunction = async ({ params }) => {
+  const pageId = process.env.NOTION_BLOG_DATABASE_ID ?? "initpage";
+  console.log(pageId);
+
+  console.log(cache.size);
+  let cacheData = cache.get<LoaderData>(pageId);
+  if (cacheData === undefined) {
+    console.log("cached blocks not found");
+    const posts: PostInfo[] = await getBlogPostInfoList();
+    cacheData = {
+      posts,
+    };
+    const result = cache.set(pageId, cacheData);
+    console.log(cache.size);
+  }
+
+  return json(cacheData);
 };
 
 type LoaderData = {
@@ -31,7 +46,7 @@ export default function Index() {
 }
 
 function ArticleList() {
-  const { posts } = useLoaderData() as LoaderData;
+  const { posts } = useLoaderData<LoaderData>();
   return (
     <div>
       <h1>ArticleList</h1>

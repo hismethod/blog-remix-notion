@@ -1,12 +1,16 @@
 import { Blockquote, Code, Divider } from "@mantine/core";
+import { Prism } from "@mantine/prism";
+import Highlight, { defaultProps, Language } from "prism-react-renderer";
 import {
   BlockObjectResponse,
+  BulletedListItemBlockObjectResponse,
   CalloutBlockObjectResponse,
   CodeBlockObjectResponse,
   DividerBlockObjectResponse,
   Heading1BlockObjectResponse,
   Heading2BlockObjectResponse,
   Heading3BlockObjectResponse,
+  ImageBlockObjectResponse,
   NumberedListItemBlockObjectResponse,
   ParagraphBlockObjectResponse,
   QuoteBlockObjectResponse,
@@ -16,16 +20,14 @@ import { RichText } from "./Text";
 
 export const RenderBlocks = ({ blocks }: { blocks: BlockObjectResponse[] }) => {
   return (
-    <div>
-      {blocks.map((block) => {
-        return (
-          <div key={block.id}>
-            <Block block={block} />
-            {block.has_children && block[block.type].children && <RenderBlocks blocks={block[block.type].children} />}
-          </div>
-        );
-      })}
-    </div>
+    <Fragment>
+      {blocks.map((block) => (
+        <div key={block.id}>
+          <Block block={block} />
+          {block.has_children && block[block.type].children && <RenderBlocks blocks={block[block.type].children} />}
+        </div>
+      ))}
+    </Fragment>
   );
 };
 
@@ -39,6 +41,8 @@ export function Block({ block }: { block: BlockObjectResponse }) {
       return <NotionH2 key={block.id} block={block} />;
     case "heading_3":
       return <NotionH3 key={block.id} block={block} />;
+    case "image":
+      return <NotionImage key={block.id} block={block} />;
     case "callout":
       return <NotionCallout key={block.id} block={block} />;
     case "quote":
@@ -48,9 +52,11 @@ export function Block({ block }: { block: BlockObjectResponse }) {
     case "divider":
       return <NotionDivider key={block.id} block={block} />;
     case "numbered_list_item":
-      return <NotionNumberedListItem block={block} />;
+      return <NotionNumberedListItem key={block.id} block={block} />;
+    case "bulleted_list_item":
+      return <NotionBulletedListItem key={block.id} block={block} />;
     default:
-      return <p style={{ color: "red" }}>{block.type}</p>;
+      return <p style={{ color: "red" }}>{`${block.type}: ${block.id}`}</p>;
   }
 }
 
@@ -63,28 +69,48 @@ function NotionParagraph({ block }: { block: ParagraphBlockObjectResponse }) {
 }
 
 const NotionH1 = ({ block }: { block: Heading1BlockObjectResponse }) => {
-  return <h1>{block.heading_1.rich_text.map((h) => h.plain_text).join("\n")}</h1>;
+  return (
+    <h1>
+      <RichText richTextArray={block.heading_1.rich_text} />
+    </h1>
+  );
 };
 
 const NotionH2 = ({ block }: { block: Heading2BlockObjectResponse }) => {
-  return <h2>{block.heading_2.rich_text.map((h) => h.plain_text).join("\n")}</h2>;
+  return (
+    <h2>
+      <RichText richTextArray={block.heading_2.rich_text} />
+    </h2>
+  );
 };
 
 const NotionH3 = ({ block }: { block: Heading3BlockObjectResponse }) => {
-  return <h3>{block.heading_3.rich_text.map((h) => h.plain_text).join("\n")}</h3>;
+  return (
+    <h3>
+      <RichText richTextArray={block.heading_3.rich_text} />
+    </h3>
+  );
 };
+
+function NotionNumberedListItem({ block }: { block: NumberedListItemBlockObjectResponse }) {
+  return <RichText richTextArray={block.numbered_list_item.rich_text} />;
+}
+
+function NotionBulletedListItem({ block }: { block: BulletedListItemBlockObjectResponse }) {
+  return <RichText richTextArray={block.bulleted_list_item.rich_text} />;
+}
 
 function NotionCallout({ block }: { block: CalloutBlockObjectResponse }) {
   let icon;
   if (block.callout.icon?.type === "emoji") {
     icon = <span>{block.callout.icon.emoji}</span>;
   } else {
-    icon = <span>TODO!!! 이모지가 파일일때 구현필요</span>;
+    icon = <span>TODO!!! 아이콘이 파일일때 구현필요</span>;
   }
 
   return (
     <div>
-      {icon}
+      {block.callout.icon && icon}
       <RichText richTextArray={block.callout.rich_text}></RichText>
     </div>
   );
@@ -101,23 +127,26 @@ function NotionQuote({ block }: { block: QuoteBlockObjectResponse }) {
 function NotionCode({ block }: { block: CodeBlockObjectResponse }) {
   return (
     <div>
-      <p>{block.code.language}</p>
-      <Code block>
-        <span>{block.code.caption}</span>
-        <RichText richTextArray={block.code.rich_text} />
-      </Code>
+      <label>{block.code.language}</label>
+      <Prism language={block.code.language as Language}>
+        {/* {block.code.caption.length > 0 && <span>{block.code.caption[0]}</span>} */}
+        {block.code.rich_text.map((code) => code.plain_text).join()}
+        {/* <RichText richTextArray={block.code.rich_text} /> */}
+      </Prism>
+    </div>
+  );
+}
+
+function NotionImage({ block }: { block: ImageBlockObjectResponse }) {
+  const hasCaption = block.image.caption.length > 0;
+  return (
+    <div>
+      <img src={block.image.type == "file" ? block.image.file.url : block.image.external.url} alt={"이미지"} />
+      {hasCaption && <RichText richTextArray={block.image.caption} />}
     </div>
   );
 }
 
 function NotionDivider({ block }: { block: DividerBlockObjectResponse }) {
   return <Divider />;
-}
-
-function NotionNumberedListItem({ block }: { block: NumberedListItemBlockObjectResponse }) {
-  return (
-    <p>
-      <RichText richTextArray={block.numbered_list_item.rich_text} />
-    </p>
-  );
 }

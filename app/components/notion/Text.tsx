@@ -1,4 +1,6 @@
+import { Text } from "@mantine/core";
 import { RichTextItemResponse, TextRichTextItemResponse } from "@notionhq/client/build/src/api-endpoints";
+import { Fragment } from "react";
 
 export function RichText({ richTextArray }: { richTextArray: RichTextItemResponse[] }) {
   if (!richTextArray) return null;
@@ -12,14 +14,22 @@ export function RichText({ richTextArray }: { richTextArray: RichTextItemRespons
       case "equation":
         return <span>{richText.plain_text}</span>;
       default:
-        return <span style={{ color: "red" }}>unkown RichText</span>;
+        return <h1>unkown RichText</h1>;
     }
   });
 
-  return <>{children}</>;
+  return <Fragment>{children}</Fragment>;
 }
 
 function TextRichText({ richtext }: { richtext: TextRichTextItemResponse }) {
-  const TagType = richtext.href ? "a" : "span";
-  return <TagType href={richtext.href ?? ""}>{richtext.plain_text.split(/(\r|\n|\r\n)/).map((content, i) => (content.match(/(\r|\n|\r\n)/) ? <br key={i} /> : content))}</TagType>;
+  const link = richtext.href;
+  const children = richtext.plain_text.split(/(\r|\n|\r\n)/).map((content, i) => (content.match(/(\r|\n|\r\n)/) ? <br key={i} /> : content));
+
+  return link ? (
+    <a href={link} target="_blank">
+      {children}
+    </a>
+  ) : (
+    <span>{children}</span>
+  );
 }

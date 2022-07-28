@@ -11,6 +11,7 @@
     "@emotion/server": "^11.4.0",
     "@mantine/core": "^5.0.0",
     "@mantine/hooks": "^5.0.0",
+    "@mantine/prism": "^5.0.0",
     "@mantine/remix": "^5.0.0",
     "@notionhq/client": "^2.1.0",
     "@remix-run/node": "^1.6.5",

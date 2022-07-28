@@ -1,6 +1,6 @@
 import { Blockquote, Code, Divider } from "@mantine/core";
 import { Prism } from "@mantine/prism";
-import Highlight, { defaultProps, Language } from "prism-react-renderer";
+import { Language } from "prism-react-renderer";
 import {
   BlockObjectResponse,
   BulletedListItemBlockObjectResponse,
@@ -97,7 +97,12 @@ function NotionNumberedListItem({ block }: { block: NumberedListItemBlockObjectR
 }
 
 function NotionBulletedListItem({ block }: { block: BulletedListItemBlockObjectResponse }) {
-  return <RichText richTextArray={block.bulleted_list_item.rich_text} />;
+  return (
+    <div>
+      -
+      <RichText richTextArray={block.bulleted_list_item.rich_text} />
+    </div>
+  );
 }
 
 function NotionCallout({ block }: { block: CalloutBlockObjectResponse }) {
@@ -128,11 +133,7 @@ function NotionCode({ block }: { block: CodeBlockObjectResponse }) {
   return (
     <div>
       <label>{block.code.language}</label>
-      <Prism language={block.code.language as Language}>
-        {/* {block.code.caption.length > 0 && <span>{block.code.caption[0]}</span>} */}
-        {block.code.rich_text.map((code) => code.plain_text).join()}
-        {/* <RichText richTextArray={block.code.rich_text} /> */}
-      </Prism>
+      <Prism language={block.code.language as Language}>{block.code.rich_text.map((code) => code.plain_text).join()}</Prism>
     </div>
   );
 }

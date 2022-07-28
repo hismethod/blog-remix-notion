@@ -11,29 +11,25 @@ import {
   ParagraphBlockObjectResponse,
   QuoteBlockObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints";
+import { Fragment } from "react";
 import { RichText } from "./Text";
 
 export const RenderBlocks = ({ blocks }: { blocks: BlockObjectResponse[] }) => {
   return (
     <div>
       {blocks.map((block) => {
-        let childrenBlock;
-        if (block.has_children) {
-          childrenBlock = block[block.type].children.map((childBlock) => <Block block={childBlock} />);
-        }
-
         return (
-          <>
+          <div key={block.id}>
             <Block block={block} />
-            <>{childrenBlock}</>
-          </>
+            {block.has_children && block[block.type].children && <RenderBlocks blocks={block[block.type].children} />}
+          </div>
         );
       })}
     </div>
   );
 };
 
-export const Block = ({ block }: { block: BlockObjectResponse }) => {
+export function Block({ block }: { block: BlockObjectResponse }) {
   switch (block.type) {
     case "paragraph":
       return <NotionParagraph key={block.id} block={block} />;
@@ -56,7 +52,7 @@ export const Block = ({ block }: { block: BlockObjectResponse }) => {
     default:
       return <p style={{ color: "red" }}>{block.type}</p>;
   }
-};
+}
 
 function NotionParagraph({ block }: { block: ParagraphBlockObjectResponse }) {
   return (
@@ -89,9 +85,7 @@ function NotionCallout({ block }: { block: CalloutBlockObjectResponse }) {
   return (
     <div>
       {icon}
-      {block.callout.rich_text.map((c) => (
-        <p>{c.plain_text}</p>
-      ))}
+      <RichText richTextArray={block.callout.rich_text}></RichText>
     </div>
   );
 }
@@ -109,8 +103,8 @@ function NotionCode({ block }: { block: CodeBlockObjectResponse }) {
     <div>
       <p>{block.code.language}</p>
       <Code block>
+        <span>{block.code.caption}</span>
         <RichText richTextArray={block.code.rich_text} />
-        <caption>{block.code.caption}</caption>
       </Code>
     </div>
   );

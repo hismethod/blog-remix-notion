@@ -7,19 +7,15 @@ import cache from "~/server/cache";
 import { PostInfo } from "~/server/model/post";
 
 export const loader: LoaderFunction = async ({ params }) => {
-  const pageId = process.env.NOTION_BLOG_DATABASE_ID ?? "initpage";
-  console.log(pageId);
+  const pageId = process.env.NOTION_BLOG_DATABASE_ID as string;
 
-  console.log(cache.size);
   let cacheData = cache.get<LoaderData>(pageId);
   if (cacheData === undefined) {
-    console.log("cached blocks not found");
     const posts: PostInfo[] = await getBlogPostInfoList();
     cacheData = {
       posts,
     };
-    const result = cache.set(pageId, cacheData);
-    console.log(cache.size);
+    cache.set(pageId, cacheData);
   }
 
   return json(cacheData);

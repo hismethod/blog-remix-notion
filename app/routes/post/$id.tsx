@@ -11,7 +11,6 @@ export const loader: LoaderFunction = async ({ params }) => {
 
   let cachedBlocks = cache.get<LoaderData>(id);
   if (cachedBlocks === undefined) {
-    console.log("cached blocks not found");
     const blocks = await getBlogPost(id);
     cachedBlocks = { blocks };
     cache.set(id, cachedBlocks);

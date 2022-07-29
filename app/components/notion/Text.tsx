@@ -26,7 +26,7 @@ function TextRichText({ richtext }: { richtext: TextRichTextItemResponse }) {
   const children = richtext.plain_text.split(/(\r|\n|\r\n)/).map((content, i) => (content.match(/(\r|\n|\r\n)/) ? <br key={i} /> : content));
 
   return link ? (
-    <a href={link} target="_blank">
+    <a className="text-red-600 underline" href={link} target="_blank">
       {children}
     </a>
   ) : (

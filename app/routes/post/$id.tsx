@@ -1,8 +1,7 @@
-import { Container } from "@mantine/core";
 import { BlockObjectResponse, PartialBlockObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import { json, LoaderFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { Block, RenderBlocks } from "~/components/notion/Block";
+import { Block, RenderBlocks, RenderPage } from "~/components/notion/Block";
 import { getBlogPost } from "~/server/api";
 import cache from "~/server/cache";
 
@@ -25,9 +24,9 @@ type LoaderData = {
 export default function Post() {
   const { blocks } = useLoaderData<LoaderData>();
   return (
-    <Container>
+    <div>
       <h1>Post</h1>
-      <RenderBlocks blocks={blocks}></RenderBlocks>
-    </Container>
+      <RenderPage blocks={blocks}></RenderPage>
+    </div>
   );
 }

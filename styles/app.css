@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  pre {
+    @apply mb-4 p-5 overflow-auto;
+    background: #f5f2f0; /* for consistency with Prismjs theme */
+  }
+  code {
+    @apply bg-gray-100 text-sm font-bold p-1 rounded-sm;
+  }
+  code:before,
+  code:after {
+    @apply font-normal text-xs;
+    content: "`";
+  }
+  pre code {
+    @apply bg-transparent font-normal p-0;
+  }
+  pre code::before,
+  pre code:after {
+    content: none;
+  }
+  hr {
+    @apply my-1;
+  }
+  img {
+    max-width: 100%;
+    vertical-align: middle;
+  }
+}
+
+@layer components {
+  .bulleted_list_item .bulleted_list_item {
+    list-style-type: circle;
+  }
+  /* .numbered_list_item .bulleted_list_item {
+    list-style-type: circle;
+  } */
+  .bulleted_list_item .bulleted_list_item .bulleted_list_item {
+    list-style-type: disc;
+  }
+  .bulleted_list_item .bulleted_list_item .bulleted_list_item .bulleted_list_item {
+    list-style-type: circle;
+  }
+}

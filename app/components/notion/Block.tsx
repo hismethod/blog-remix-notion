@@ -1,11 +1,9 @@
-import { Blockquote, Code, Divider } from "@mantine/core";
-import { Prism } from "@mantine/prism";
-import { Language } from "prism-react-renderer";
 import {
   BlockObjectResponse,
   BulletedListItemBlockObjectResponse,
   CalloutBlockObjectResponse,
   CodeBlockObjectResponse,
+  ColumnBlockObjectResponse,
   DividerBlockObjectResponse,
   Heading1BlockObjectResponse,
   Heading2BlockObjectResponse,
@@ -14,33 +12,40 @@ import {
   NumberedListItemBlockObjectResponse,
   ParagraphBlockObjectResponse,
   QuoteBlockObjectResponse,
+  ToggleBlockObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints";
-import { Fragment } from "react";
+import { Children, Fragment } from "react";
 import { RichText } from "./Text";
+
+export function RenderPage({ blocks }: { blocks: BlockObjectResponse[] }) {
+  return (
+    <article className="container mx-auto max-w-4xl prose dark:prose-invert prose-headings:mt-3 prose-heading:mb-2 prose-p:my-[1px] prose-p:py-[2px]">
+      <RenderBlocks blocks={blocks}></RenderBlocks>
+    </article>
+  );
+}
 
 export const RenderBlocks = ({ blocks }: { blocks: BlockObjectResponse[] }) => {
   return (
     <Fragment>
-      {blocks.map((block) => (
-        <div key={block.id}>
-          <Block block={block} />
-          {block.has_children && block[block.type].children && <RenderBlocks blocks={block[block.type].children} />}
-        </div>
-      ))}
+      {blocks.map((block) => {
+        const children = <>{block.has_children && block[block.type].children && <RenderBlocks blocks={block[block.type].children} />}</>;
+        return <Block key={block.id} block={block} children={children} />;
+      })}
     </Fragment>
   );
 };
 
-export function Block({ block }: { block: BlockObjectResponse }) {
+export function Block({ block, children }: { block: BlockObjectResponse; children: React.ReactNode }) {
   switch (block.type) {
     case "paragraph":
-      return <NotionParagraph key={block.id} block={block} />;
+      return <NotionParagraph key={block.id} block={block} children={children} />;
     case "heading_1":
-      return <NotionH1 key={block.id} block={block} />;
+      return <NotionH1 key={block.id} block={block} children={children} />;
     case "heading_2":
-      return <NotionH2 key={block.id} block={block} />;
+      return <NotionH2 key={block.id} block={block} children={children} />;
     case "heading_3":
-      return <NotionH3 key={block.id} block={block} />;
+      return <NotionH3 key={block.id} block={block} children={children} />;
     case "image":
       return <NotionImage key={block.id} block={block} />;
     case "callout":
@@ -52,56 +57,96 @@ export function Block({ block }: { block: BlockObjectResponse }) {
     case "divider":
       return <NotionDivider key={block.id} block={block} />;
     case "numbered_list_item":
-      return <NotionNumberedListItem key={block.id} block={block} />;
+      return <NotionNumberedListItem key={block.id} block={block} children={children} />;
     case "bulleted_list_item":
-      return <NotionBulletedListItem key={block.id} block={block} />;
+      return <NotionBulletedListItem key={block.id} block={block} children={children} />;
+    case "column_list":
+      return <NotionColumnList children={children} />;
+    case "column":
+      return <NotionColumn block={block} children={children} />;
+    case "toggle":
+      return <NotionToggle block={block} children={children} />;
     default:
-      return <p style={{ color: "red" }}>{`${block.type}: ${block.id}`}</p>;
+      return <div className={`${block.type} text-purple-600`}>{`${block.type}: ${block.id}`}</div>;
   }
 }
 
-function NotionParagraph({ block }: { block: ParagraphBlockObjectResponse }) {
+function NotionParagraph({ block, children }: { block: ParagraphBlockObjectResponse; children: React.ReactNode }) {
   return (
-    <p>
+    <p className="min-h-[28px]">
       <RichText richTextArray={block.paragraph.rich_text} />
+      {children}
     </p>
   );
 }
 
-const NotionH1 = ({ block }: { block: Heading1BlockObjectResponse }) => {
+const NotionH1 = ({ block, children }: { block: Heading1BlockObjectResponse; children: React.ReactNode }) => {
   return (
-    <h1>
-      <RichText richTextArray={block.heading_1.rich_text} />
-    </h1>
+    <>
+      <h1>
+        <RichText richTextArray={block.heading_1.rich_text} />
+      </h1>
+      {children}
+    </>
   );
 };
 
-const NotionH2 = ({ block }: { block: Heading2BlockObjectResponse }) => {
+const NotionH2 = ({ block, children }: { block: Heading2BlockObjectResponse; children: React.ReactNode }) => {
   return (
-    <h2>
-      <RichText richTextArray={block.heading_2.rich_text} />
-    </h2>
+    <>
+      <h2>
+        <RichText richTextArray={block.heading_2.rich_text} />
+      </h2>
+      {children}
+    </>
   );
 };
 
-const NotionH3 = ({ block }: { block: Heading3BlockObjectResponse }) => {
+const NotionH3 = ({ block, children }: { block: Heading3BlockObjectResponse; children: React.ReactNode }) => {
   return (
-    <h3>
-      <RichText richTextArray={block.heading_3.rich_text} />
-    </h3>
+    <>
+      <h3>
+        <RichText richTextArray={block.heading_3.rich_text} />
+      </h3>
+      {children}
+    </>
   );
 };
 
-function NotionNumberedListItem({ block }: { block: NumberedListItemBlockObjectResponse }) {
-  return <RichText richTextArray={block.numbered_list_item.rich_text} />;
+function NotionNumberedListItem({ block, children }: { block: NumberedListItemBlockObjectResponse; children: React.ReactNode }) {
+  return (
+    <div className="numbered_list_item ml-6 list-item list-decimal">
+      <RichText richTextArray={block.numbered_list_item.rich_text} />
+      {children}
+    </div>
+  );
 }
 
-function NotionBulletedListItem({ block }: { block: BulletedListItemBlockObjectResponse }) {
+function NotionBulletedListItem({ block, children }: { block: BulletedListItemBlockObjectResponse; children: React.ReactNode }) {
   return (
-    <div>
-      -
+    <div className="bulleted_list_item ml-6 list-item list-disc">
       <RichText richTextArray={block.bulleted_list_item.rich_text} />
+      {children}
     </div>
+  );
+}
+
+function NotionColumnList({ children }: { children: React.ReactNode }) {
+  return <div className="flex flex-row">{children}</div>;
+}
+
+function NotionColumn({ block, children }: { block: ColumnBlockObjectResponse; children: React.ReactNode }) {
+  return <div className="flex-1">{children}</div>;
+}
+
+function NotionToggle({ block, children }: { block: ToggleBlockObjectResponse; children: React.ReactNode }) {
+  return (
+    <details>
+      <summary>
+        <RichText richTextArray={block.toggle.rich_text} />
+      </summary>
+      {children}
+    </details>
   );
 }
 
@@ -123,9 +168,9 @@ function NotionCallout({ block }: { block: CalloutBlockObjectResponse }) {
 
 function NotionQuote({ block }: { block: QuoteBlockObjectResponse }) {
   return (
-    <Blockquote>
+    <blockquote>
       <RichText richTextArray={block.quote.rich_text}></RichText>
-    </Blockquote>
+    </blockquote>
   );
 }
 
@@ -133,7 +178,7 @@ function NotionCode({ block }: { block: CodeBlockObjectResponse }) {
   return (
     <div>
       <label>{block.code.language}</label>
-      <Prism language={block.code.language as Language}>{block.code.rich_text.map((code) => code.plain_text).join()}</Prism>
+      <code>{block.code.rich_text.map((code) => code.plain_text).join()}</code>
     </div>
   );
 }
@@ -141,13 +186,17 @@ function NotionCode({ block }: { block: CodeBlockObjectResponse }) {
 function NotionImage({ block }: { block: ImageBlockObjectResponse }) {
   const hasCaption = block.image.caption.length > 0;
   return (
-    <div>
+    <>
       <img src={block.image.type == "file" ? block.image.file.url : block.image.external.url} alt={"이미지"} />
       {hasCaption && <RichText richTextArray={block.image.caption} />}
-    </div>
+    </>
   );
 }
 
 function NotionDivider({ block }: { block: DividerBlockObjectResponse }) {
-  return <Divider />;
+  return (
+    <div className="not-prose">
+      <hr />
+    </div>
+  );
 }

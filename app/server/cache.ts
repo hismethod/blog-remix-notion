@@ -1,15 +1,19 @@
 import LRUCache from "lru-cache";
-const cache = new LRUCache({ ttl: 1000 * 60, max: 500, });
-// export namesapce Cache {
-//   private static instance: Cache
-//   cache: LRUCache<unknown, unknown>;
-//   private constructor() {
-//     this.cache = new LRUCache({ttl: 1000 * 60, max: 500, });
-//     console.log('생성자호출');
-//   }
-//   public static getInstance() {
-//     return this.instance || (this.instance = new this());
-//   }
-// }
+let cache: LRUCache<unknown, unknown>;
+declare global {
+  var __cache: LRUCache<unknown, unknown> | undefined;
+}
+
+const seconds = 1000;
+const minutes = seconds * 60;
+
+if(process.env.NODE_ENV === "production") {
+  cache = new LRUCache({ ttl: 10 * minutes, max: 500, });
+} else {
+  if(!global.__cache) {
+    global.__cache = new LRUCache({ ttl: 30 * minutes, max: 500, });
+  }
+  cache = global.__cache;
+}
 
 export default cache;

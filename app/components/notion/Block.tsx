@@ -19,7 +19,7 @@ import { RichText } from "./Text";
 
 export function RenderPage({ blocks }: { blocks: BlockObjectResponse[] }) {
   return (
-    <article className="container mx-auto max-w-4xl prose dark:prose-invert prose-headings:mt-3 prose-heading:mb-2 prose-p:my-[1px] prose-p:py-[2px]">
+    <article className="container mx-auto max-w-3xl prose dark:prose-invert">
       <RenderBlocks blocks={blocks}></RenderBlocks>
     </article>
   );
@@ -73,7 +73,7 @@ export function Block({ block, children }: { block: BlockObjectResponse; childre
 
 function NotionParagraph({ block, children }: { block: ParagraphBlockObjectResponse; children: React.ReactNode }) {
   return (
-    <p className="min-h-[28px]">
+    <p className="min-h-[30px] mt-[2px] mb-[1px]">
       <RichText richTextArray={block.paragraph.rich_text} />
       {children}
     </p>
@@ -83,7 +83,7 @@ function NotionParagraph({ block, children }: { block: ParagraphBlockObjectRespo
 const NotionH1 = ({ block, children }: { block: Heading1BlockObjectResponse; children: React.ReactNode }) => {
   return (
     <>
-      <h1>
+      <h1 className="mt-[1.4rem] mb-[1px]">
         <RichText richTextArray={block.heading_1.rich_text} />
       </h1>
       {children}
@@ -94,7 +94,7 @@ const NotionH1 = ({ block, children }: { block: Heading1BlockObjectResponse; chi
 const NotionH2 = ({ block, children }: { block: Heading2BlockObjectResponse; children: React.ReactNode }) => {
   return (
     <>
-      <h2>
+      <h2 className="font-semibold mt-[1.4rem] mb-[1px]">
         <RichText richTextArray={block.heading_2.rich_text} />
       </h2>
       {children}
@@ -105,7 +105,7 @@ const NotionH2 = ({ block, children }: { block: Heading2BlockObjectResponse; chi
 const NotionH3 = ({ block, children }: { block: Heading3BlockObjectResponse; children: React.ReactNode }) => {
   return (
     <>
-      <h3>
+      <h3 className="mt-[1.4rem] mb-[1px]">
         <RichText richTextArray={block.heading_3.rich_text} />
       </h3>
       {children}

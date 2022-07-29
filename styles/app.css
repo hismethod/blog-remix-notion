@@ -3,6 +3,13 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    @apply dark:bg-slate-800;
+  }
+  h2, h3 {
+    margin-top: 1.4rem;
+    margin-bottom: 1px;
+  }
   pre {
     @apply mb-4 p-5 overflow-auto;
     background: #f5f2f0; /* for consistency with Prismjs theme */

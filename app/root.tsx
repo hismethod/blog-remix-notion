@@ -1,11 +1,12 @@
-import type { LinksFunction, MetaFunction } from "@remix-run/node";
-import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
+import type { LinksFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
+import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from "@remix-run/react";
 import React, { useState } from "react";
 import styles from "./styles/app.css";
 import lightStyles from "./styles/light.css";
 import darkStyles from "./styles/dark.css";
-import { NonFlashOfWrongThemeEls, ThemeProvider, useTheme } from "./utils/theme-provider";
+import { NonFlashOfWrongThemeEls, Theme, ThemeProvider, useTheme } from "./utils/theme.provider";
 import clsx from "clsx";
+import { getThemeSession } from "./utils/theme.server";
 
 const appTitle = "bebright 블로그";
 
@@ -18,12 +19,27 @@ export const meta: MetaFunction = () => ({
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: styles },
   { rel: "stylesheet", href: lightStyles },
-  { rel: "stylesheet", href: darkStyles, media: "(prefers-color-scheme: dark)" },
 ];
 
+export type LoaderData = {
+  theme: Theme | null;
+};
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const themeSession = await getThemeSession(request);
+
+  const data: LoaderData = {
+    theme: themeSession.getTheme(),
+  };
+
+  return data;
+};
+
 export default function App() {
+  const { theme } = useLoaderData<LoaderData>();
+
   return (
-    <ThemeProvider>
+    <ThemeProvider specifiedTheme={theme}>
       <Document>
         <Outlet />
       </Document>
@@ -33,12 +49,14 @@ export default function App() {
 
 function Document({ children }: { children: React.ReactNode; title?: string }) {
   const [theme] = useTheme();
+  const data = useLoaderData<LoaderData>();
+
   return (
     <html lang="ko" className={clsx(theme)}>
       <head>
         <Meta />
         <Links />
-        <NonFlashOfWrongThemeEls />
+        <NonFlashOfWrongThemeEls ssrTheme={Boolean(data.theme)} />
       </head>
       <body>
         {children}

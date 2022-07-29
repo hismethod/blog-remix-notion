@@ -4,7 +4,7 @@ import Logo from "~/components/Logo";
 import { getBlogPostInfoList } from "~/server/api";
 import cache from "~/server/cache";
 import { PostInfo } from "~/server/model/post";
-import { Theme, useTheme } from "~/utils/theme-provider";
+import { Theme, useTheme } from "~/utils/theme.provider";
 
 export const loader: LoaderFunction = async ({ params }) => {
   const pageId = process.env.NOTION_BLOG_DATABASE_ID as string;

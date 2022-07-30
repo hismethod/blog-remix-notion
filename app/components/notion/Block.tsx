@@ -14,8 +14,13 @@ import {
   QuoteBlockObjectResponse,
   ToggleBlockObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints";
-import { Children, Fragment } from "react";
+import Highlight, { defaultProps, Language } from "prism-react-renderer";
+import GitHubTheme from "prism-react-renderer/themes/github";
+import VsDarkTheme from "prism-react-renderer/themes/vsDark";
+
+import { Fragment } from "react";
 import { RichText } from "./Text";
+import { Theme, useTheme } from "~/utils/theme.provider";
 
 export function RenderPage({ blocks }: { blocks: BlockObjectResponse[] }) {
   return (
@@ -115,7 +120,7 @@ const NotionH3 = ({ block, children }: { block: Heading3BlockObjectResponse; chi
 
 function NotionNumberedListItem({ block, children }: { block: NumberedListItemBlockObjectResponse; children: React.ReactNode }) {
   return (
-    <div className="numbered_list_item ml-6 list-item list-decimal">
+    <div className="numbered_list_item min-h-[30px] ml-6 my-2 list-item list-decimal">
       <RichText richTextArray={block.numbered_list_item.rich_text} />
       {children}
     </div>
@@ -124,7 +129,7 @@ function NotionNumberedListItem({ block, children }: { block: NumberedListItemBl
 
 function NotionBulletedListItem({ block, children }: { block: BulletedListItemBlockObjectResponse; children: React.ReactNode }) {
   return (
-    <div className="bulleted_list_item ml-6 list-item list-disc">
+    <div className="bulleted_list_item min-h-[30px] ml-6 my-1 list-item list-disc">
       <RichText richTextArray={block.bulleted_list_item.rich_text} />
       {children}
     </div>
@@ -175,11 +180,26 @@ function NotionQuote({ block }: { block: QuoteBlockObjectResponse }) {
 }
 
 function NotionCode({ block }: { block: CodeBlockObjectResponse }) {
+  const [theme] = useTheme();
   return (
-    <div>
-      <label>{block.code.language}</label>
-      <code>{block.code.rich_text.map((code) => code.plain_text).join()}</code>
-    </div>
+    <Highlight
+      {...defaultProps}
+      theme={theme == Theme.LIGHT ? GitHubTheme : VsDarkTheme}
+      code={block.code.rich_text.map((code) => code.plain_text).join("\n")}
+      language={block.code.language as Language}
+    >
+      {({ className, style, tokens, getLineProps, getTokenProps }) => (
+        <pre className={className} style={style}>
+          {tokens.map((line, i) => (
+            <div {...getLineProps({ line, key: i })}>
+              {line.map((token, key) => (
+                <span {...getTokenProps({ token, key })} />
+              ))}
+            </div>
+          ))}
+        </pre>
+      )}
+    </Highlight>
   );
 }
 

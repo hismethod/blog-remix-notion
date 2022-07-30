@@ -38,13 +38,18 @@ export async function getBlogPostInfoList(): Promise<PostInfo[]> {
     if(!isFullPage(page)) {
       continue;
     }
-    const {id, url, icon, created_time, last_edited_time, properties} = page;
+    const {id, url, icon, created_time, last_edited_time, cover, properties} = page;
     const titleProps = page.properties[titleKey].title as Array<TextRichTextItemResponse>;
     const title = titleProps[0]?.text.content ?? "제목없음";
+    let coverUrl = null;
+    if(cover) {
+      coverUrl = cover[cover.type].url;
+    }
     const pageInfo = {
       id: id,
       title: title,
       url: url,
+      coverUrl: coverUrl,
       created_at: new Date(created_time),
       updated_at: new Date(last_edited_time),
     };

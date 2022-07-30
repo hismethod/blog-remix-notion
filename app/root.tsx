@@ -7,6 +7,7 @@ import darkStyles from "./styles/dark.css";
 import { NonFlashOfWrongThemeEls, Theme, ThemeProvider, useTheme } from "./utils/theme.provider";
 import clsx from "clsx";
 import { getThemeSession } from "./utils/theme.server";
+import Layout from "./components/layout/Layout";
 
 const appTitle = "bebright 블로그";
 
@@ -59,7 +60,7 @@ function Document({ children }: { children: React.ReactNode; title?: string }) {
         <NonFlashOfWrongThemeEls ssrTheme={Boolean(data.theme)} />
       </head>
       <body>
-        {children}
+        <Layout>{children}</Layout>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />

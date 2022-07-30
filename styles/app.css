@@ -3,8 +3,15 @@
 @tailwind utilities;
 
 @layer base {
+  
   html {
     @apply dark:bg-slate-800;
+  }
+  span {
+    @apply leading-tight;
+  }
+  p {
+    @apply leading-normal;
   }
   h2, h3 {
     margin-top: 1.4rem;

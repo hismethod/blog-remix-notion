@@ -23,13 +23,13 @@ export function RichText({ richTextArray }: { richTextArray: RichTextItemRespons
 
 function TextRichText({ richtext }: { richtext: TextRichTextItemResponse }) {
   const link = richtext.href;
-  const children = richtext.plain_text.split(/(\r|\n|\r\n)/).map((content, i) => (content.match(/(\r|\n|\r\n)/) ? <br key={i} /> : content));
+  const children = richtext.plain_text;
 
   return link ? (
     <a className="text-red-500 underline py-[3px]" href={link} target="_blank">
       {children}
     </a>
   ) : (
-    <span className="py-[3px]">{children}</span>
+    <span className="whitespace-pre-wrap break-words py-[3px]">{children}</span>
   );
 }

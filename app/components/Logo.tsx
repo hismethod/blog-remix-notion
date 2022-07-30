@@ -1,3 +1,9 @@
+import { Link } from "@remix-run/react";
+
 export default function Logo() {
-  return <img src={null} />;
+  return (
+    <Link to="/">
+      <span>bebright</span>
+    </Link>
+  );
 }

@@ -18,7 +18,7 @@ function ThemeProvider({ children, specifiedTheme }: { children: ReactNode; spec
   const persistThemeRef = useRef(persistTheme);
   const mountRun = useRef(false);
 
-  const [theme, setTheme] = useState<Theme | null>(() => {
+  const [colorTheme, setColorTheme] = useState<Theme | null>(() => {
     if (specifiedTheme) {
       if (themes.includes(specifiedTheme)) {
         return specifiedTheme;
@@ -37,7 +37,7 @@ function ThemeProvider({ children, specifiedTheme }: { children: ReactNode; spec
   useEffect(() => {
     const mediaQuery = window.matchMedia(prefersDarkMQ);
     const handleChange = () => {
-      setTheme(mediaQuery.matches ? Theme.DARK : Theme.LIGHT);
+      setColorTheme(mediaQuery.matches ? Theme.DARK : Theme.LIGHT);
     };
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
@@ -52,14 +52,14 @@ function ThemeProvider({ children, specifiedTheme }: { children: ReactNode; spec
       mountRun.current = true;
       return;
     }
-    if (!theme) {
+    if (!colorTheme) {
       return;
     }
 
-    persistThemeRef.current.submit({ theme }, { action: "action/set-theme", method: "post" });
-  }, [theme]);
+    persistThemeRef.current.submit({ theme: colorTheme }, { action: "action/set-theme", method: "post" });
+  }, [colorTheme]);
 
-  return <ThemeContext.Provider value={[theme, setTheme]}>{children}</ThemeContext.Provider>;
+  return <ThemeContext.Provider value={[colorTheme, setColorTheme]}>{children}</ThemeContext.Provider>;
 }
 
 function useTheme() {

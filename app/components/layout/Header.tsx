@@ -23,11 +23,11 @@ export default function Header() {
 }
 
 function AppColorThemeSwitcher() {
-  const [theme, setTheme] = useTheme();
+  const [colorTheme, setColorTheme] = useTheme();
   const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === Theme.LIGHT ? Theme.DARK : Theme.LIGHT));
+    setColorTheme((prevTheme) => (prevTheme === Theme.LIGHT ? Theme.DARK : Theme.LIGHT));
   };
   const iconSize = 24;
 
-  return <button onClick={toggleTheme}>{theme == Theme.LIGHT ? <MdDarkMode size={iconSize} /> : <MdOutlineLightMode size={iconSize} />}</button>;
+  return <button onClick={toggleTheme}>{colorTheme == Theme.LIGHT ? <MdDarkMode size={iconSize} /> : <MdOutlineLightMode size={iconSize} />}</button>;
 }

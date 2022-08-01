@@ -15,12 +15,16 @@ import {
   ToggleBlockObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints";
 import Highlight, { defaultProps, Language } from "prism-react-renderer";
-import GitHubTheme from "prism-react-renderer/themes/github";
-import VsDarkTheme from "prism-react-renderer/themes/vsDark";
+
+// import prismLightTheme from "prism-react-renderer/themes/github";
+// import prismDarkTheme from "prism-react-renderer/themes/vsDark";
+// import prismLightTheme from "~/styles/prism.light.json";
+// import prismDarkTheme from "~/styles/prism.one.dark.css";
 
 import { Fragment } from "react";
 import { RichText } from "./Text";
 import { Theme, useTheme } from "~/utils/theme.provider";
+import { CodeHighlighter } from "../CodeHighlight";
 
 export function RenderPage({ blocks }: { blocks: BlockObjectResponse[] }) {
   return (
@@ -58,7 +62,7 @@ export function Block({ block, children }: { block: BlockObjectResponse; childre
     case "quote":
       return <NotionQuote key={block.id} block={block} />;
     case "code":
-      return <NotionCode key={block.id} block={block} />;
+      return <NotionCode2 key={block.id} block={block} />;
     case "divider":
       return <NotionDivider key={block.id} block={block} />;
     case "numbered_list_item":
@@ -179,12 +183,21 @@ function NotionQuote({ block }: { block: QuoteBlockObjectResponse }) {
   );
 }
 
+function NotionCode2({ block }: { block: CodeBlockObjectResponse }) {
+  return (
+    <CodeHighlighter showLineNumber={true} language={block.code.language as Language}>
+      {block.code.rich_text.map((code) => code.plain_text).join("\n")}
+    </CodeHighlighter>
+  );
+}
+
 function NotionCode({ block }: { block: CodeBlockObjectResponse }) {
-  const [theme] = useTheme();
+  const [colorTheme] = useTheme();
   return (
     <Highlight
       {...defaultProps}
-      theme={theme == Theme.LIGHT ? GitHubTheme : VsDarkTheme}
+      // theme={colorTheme == Theme.LIGHT ? prismLightTheme : prismDarkTheme}
+      theme={undefined}
       code={block.code.rich_text.map((code) => code.plain_text).join("\n")}
       language={block.code.language as Language}
     >

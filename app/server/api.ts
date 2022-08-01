@@ -60,25 +60,21 @@ export async function getBlogPostInfoList(): Promise<PostInfo[]> {
 }
 
 async function getBlocks(id: string) {
-  let blocks: BlockObjectResponse[] = [];
-  for await (const block of iteratePaginatedAPI(notion.blocks.children.list, {
-    block_id: id,
-  })) {
-    if(!isFullBlock(block)) continue;
-    blocks.push(block);
-    // if(block.has_children) {
-    //   const childrenBlocks = await getBlocks(block.id);
-    //   blocks.push(...childrenBlocks);
-    // }
+  let blockResponse = await notion.blocks.children.list({ block_id: id, page_size: 100 });
+  let blocks = blockResponse.results;
+
+  while (blockResponse.has_more && blockResponse.next_cursor) {
+    blockResponse = await notion.blocks.children.list({
+      block_id: id,
+      page_size: 100,
+      start_cursor: blockResponse.next_cursor,
+    });
+    blocks = blocks.concat(blockResponse.results);
   }
-  
-  // const blocks = collectPaginatedAPI(notion.blocks.children.list, {block_id: id});
   return blocks;
 }
 
 export async function getBlogPost(id: string) {
-  // const blocks = await getBlocks(id);
-  // return blocks;
   let blockResponse = await notion.blocks.children.list({ block_id: id, page_size: 100 });
   let blocks = [
     ...await deepFetchAllChildren(blockResponse.results)
@@ -87,27 +83,27 @@ export async function getBlogPost(id: string) {
   while (blockResponse.has_more && blockResponse.next_cursor) {
     blockResponse = await notion.blocks.children.list({
       block_id: id,
-      page_size: 50,
+      page_size: 100,
       start_cursor: blockResponse.next_cursor
     });
 
-    const results = blockResponse.results;
-    blocks = blocks.concat(await deepFetchAllChildren(results));
+    blocks = [...blocks, ...await deepFetchAllChildren(blockResponse.results)];
   }
 
   return blocks;
 }
 
 async function deepFetchAllChildren (blocks: GetBlockResponse[]): Promise<BlockObjectResponse[]> {
-
-  const fetchChildrenMap = blocks.filter(block => block.has_children).map(block => {
-    return {
+  const fetchChildrenMap = blocks
+  .filter(block => block.has_children)
+  .map(block => (
+    {
       promise: notion.blocks.children.list({ block_id: block.id!, page_size: 100 }),
       parent_block: block
-    };
-  });
+    }
+  ));
 
-  const results = await Promise.all<ListBlockChildrenResponse>(fetchChildrenMap.map(value => value.promise));
+  const results = await Promise.all(fetchChildrenMap.map(value => value.promise));
 
   for (let i = 0; i < results.length; i++) {
     const childBlocks = results[i].results;

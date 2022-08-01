@@ -23,24 +23,24 @@ export const links: LinksFunction = () => [
 ];
 
 export type LoaderData = {
-  theme: Theme | null;
+  colorTheme: Theme | null;
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
   const themeSession = await getThemeSession(request);
 
   const data: LoaderData = {
-    theme: themeSession.getTheme(),
+    colorTheme: themeSession.getTheme(),
   };
 
   return data;
 };
 
 export default function App() {
-  const { theme } = useLoaderData<LoaderData>();
+  const { colorTheme } = useLoaderData<LoaderData>();
 
   return (
-    <ThemeProvider specifiedTheme={theme}>
+    <ThemeProvider specifiedTheme={colorTheme}>
       <Document>
         <Outlet />
       </Document>
@@ -49,15 +49,15 @@ export default function App() {
 }
 
 function Document({ children }: { children: React.ReactNode; title?: string }) {
-  const [theme] = useTheme();
   const data = useLoaderData<LoaderData>();
+  const [colorTheme] = useTheme();
 
   return (
-    <html lang="ko" className={clsx(theme)}>
+    <html lang="ko" className={clsx(colorTheme)}>
       <head>
         <Meta />
         <Links />
-        <NonFlashOfWrongThemeEls ssrTheme={Boolean(data.theme)} />
+        <NonFlashOfWrongThemeEls ssrTheme={Boolean(data.colorTheme)} />
       </head>
       <body>
         <Layout>{children}</Layout>

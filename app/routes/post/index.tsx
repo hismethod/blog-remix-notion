@@ -1,8 +1,14 @@
-import { json, LoaderFunction } from "@remix-run/node";
+import { HeadersFunction, json, LoaderFunction } from "@remix-run/node";
 import { Link, LinkProps, useLoaderData } from "@remix-run/react";
 import { getBlogPostInfoList } from "~/server/api";
 import cache from "~/server/cache";
 import { PostInfo } from "~/server/model/post";
+
+export const headers: HeadersFunction = ({ loaderHeaders, parentHeaders }) => {
+  return {
+    "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=300",
+  };
+};
 
 export const loader: LoaderFunction = async ({ params }) => {
   const pageId = process.env.NOTION_BLOG_DATABASE_ID as string;

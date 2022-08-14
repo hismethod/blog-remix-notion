@@ -1,5 +1,5 @@
 import { HeadersFunction, json, LoaderFunction } from "@remix-run/node";
-import { Link, LinkProps, useLoaderData } from "@remix-run/react";
+import { Link, LinkProps, PrefetchPageLinks, useLoaderData } from "@remix-run/react";
 import { getBlogPostInfoList } from "~/server/api";
 import cache from "~/server/cache";
 import { PostInfo } from "~/server/model/post";
@@ -31,7 +31,8 @@ type LoaderData = {
 
 export default function PostIndex() {
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto max-w-3xl">
+      <h1 className="text-3xl">블로그</h1>
       <ArticleList />
     </div>
   );
@@ -40,14 +41,23 @@ export default function PostIndex() {
 function ArticleList() {
   const { posts } = useLoaderData<LoaderData>();
   return (
-    <div>
-      <h1>ArticleList</h1>
-      <div className="grid grid-cols-3 gap-4">
-        {posts.map((page) => (
-          <PostCard key={page.id} linkTo={`/post/${page.id}`} title={page.title} imageUrl={page.coverUrl}></PostCard>
-        ))}
+    <ul className="">
+      {posts.map((page) => (
+        <li>
+          <PostListItem key={page.id} linkTo={`/post/${page.id}`} title={page.title} content={""} imageUrl={null} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function PostListItem({ linkTo, title, content, imageUrl }: { linkTo: string; title: string; content: string; imageUrl: string | null }) {
+  return (
+    <Link to={linkTo} prefetch="intent">
+      <div className="my-4">
+        <span className="text-xl">{title}</span>
       </div>
-    </div>
+    </Link>
   );
 }
 

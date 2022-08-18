@@ -3,6 +3,7 @@ import { Link, LinkProps, PrefetchPageLinks, useLoaderData } from "@remix-run/re
 import { getBlogPostInfoList } from "~/server/api";
 import cache from "~/server/cache";
 import { PostInfo } from "~/server/model/post";
+import { getDateString } from "~/utils";
 
 export const headers: HeadersFunction = ({ loaderHeaders, parentHeaders }) => {
   return {
@@ -32,7 +33,7 @@ type LoaderData = {
 export default function PostIndex() {
   return (
     <div className="container mx-auto max-w-3xl">
-      <h1 className="text-3xl">블로그</h1>
+      <h1 className="text-7xl mb-16">포스팅</h1>
       <ArticleList />
     </div>
   );
@@ -41,21 +42,28 @@ export default function PostIndex() {
 function ArticleList() {
   const { posts } = useLoaderData<LoaderData>();
   return (
-    <ul className="">
+    <ul>
       {posts.map((page) => (
-        <li>
-          <PostListItem key={page.id} linkTo={`/post/${page.id}`} title={page.title} content={""} imageUrl={null} />
+        <li key={page.id}>
+          <PostListItem post={page} />
         </li>
       ))}
     </ul>
   );
 }
 
-function PostListItem({ linkTo, title, content, imageUrl }: { linkTo: string; title: string; content: string; imageUrl: string | null }) {
+function PostListItem({ post }: { post: PostInfo }) {
+  const postDate = getDateString(post.created_at, { shortYear: false, showDay: false, shortDay: false });
+
   return (
-    <Link to={linkTo} prefetch="intent">
-      <div className="my-4">
-        <span className="text-xl">{title}</span>
+    <Link to={`/post/${post.id}`} prefetch="intent">
+      <div className="flex flex-row my-8">
+        <div className="basis-40">
+          <span className="text-sm">{postDate}</span>
+        </div>
+        <div className="flex-1">
+          <h3 className="text-2xl leading-tight mt-0">{post.title}</h3>
+        </div>
       </div>
     </Link>
   );

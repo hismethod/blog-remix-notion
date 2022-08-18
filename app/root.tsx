@@ -1,25 +1,21 @@
 import type { LinksFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
 import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from "@remix-run/react";
-import React, { useState } from "react";
-import styles from "./styles/app.css";
-import lightStyles from "./styles/light.css";
-import darkStyles from "./styles/dark.css";
-import { NonFlashOfWrongThemeEls, Theme, ThemeProvider, useTheme } from "./utils/theme.provider";
+import appStyles from "./styles/app.css";
+import colorStyles from "./styles/light.css";
+import { NonFlashOfWrongThemeEls, Theme, ThemeProvider, useColorTheme } from "./utils/theme-provider";
 import clsx from "clsx";
 import { getThemeSession } from "./utils/theme.server";
 import Layout from "./components/layout/Layout";
 
-const appTitle = "bebright 블로그";
-
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
-  title: appTitle,
+  title: "bebright 블로그",
   viewport: "width=device-width,initial-scale=1",
 });
 
 export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: styles },
-  { rel: "stylesheet", href: lightStyles },
+  { rel: "stylesheet", href: appStyles },
+  { rel: "stylesheet", href: colorStyles },
 ];
 
 export type LoaderData = {
@@ -28,7 +24,6 @@ export type LoaderData = {
 
 export const loader: LoaderFunction = async ({ request }) => {
   const themeSession = await getThemeSession(request);
-
   const data: LoaderData = {
     colorTheme: themeSession.getTheme(),
   };
@@ -36,21 +31,19 @@ export const loader: LoaderFunction = async ({ request }) => {
   return data;
 };
 
-export default function App() {
+export default function AppWithProviders() {
   const { colorTheme } = useLoaderData<LoaderData>();
 
   return (
     <ThemeProvider specifiedTheme={colorTheme}>
-      <Document>
-        <Outlet />
-      </Document>
+      <App />
     </ThemeProvider>
   );
 }
 
-function Document({ children }: { children: React.ReactNode; title?: string }) {
+function App() {
   const data = useLoaderData<LoaderData>();
-  const [colorTheme] = useTheme();
+  const [colorTheme] = useColorTheme();
 
   return (
     <html lang="ko" className={clsx(colorTheme)}>
@@ -60,22 +53,13 @@ function Document({ children }: { children: React.ReactNode; title?: string }) {
         <NonFlashOfWrongThemeEls ssrTheme={Boolean(data.colorTheme)} />
       </head>
       <body>
-        <Layout>{children}</Layout>
+        <Layout>
+          <Outlet />
+        </Layout>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
       </body>
     </html>
-  );
-}
-
-export function ErrorBoundary({ error }: { error: Error }) {
-  return (
-    <Document>
-      <div className="container error-container">
-        <h1>App Error</h1>
-        <pre>{error.message}</pre>
-      </div>
-    </Document>
   );
 }

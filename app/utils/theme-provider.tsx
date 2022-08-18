@@ -12,6 +12,7 @@ type ThemeContextType = [Theme | null, Dispatch<SetStateAction<Theme | null>>];
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const prefersDarkMQ = "(prefers-color-scheme: dark)";
 const getPreferredTheme = () => (window.matchMedia(prefersDarkMQ).matches ? Theme.DARK : Theme.LIGHT);
+const themes: Array<Theme> = Object.values(Theme);
 
 function ThemeProvider({ children, specifiedTheme }: { children: ReactNode; specifiedTheme: Theme | null }) {
   const persistTheme = useFetcher();
@@ -62,10 +63,10 @@ function ThemeProvider({ children, specifiedTheme }: { children: ReactNode; spec
   return <ThemeContext.Provider value={[colorTheme, setColorTheme]}>{children}</ThemeContext.Provider>;
 }
 
-function useTheme() {
+function useColorTheme() {
   const context = useContext(ThemeContext);
   if (context === undefined) {
-    throw new Error("useTheme must be used within a ThemeProvider");
+    throw new Error("useColorTheme must be used within a ThemeProvider");
   }
   return context;
 }
@@ -102,7 +103,7 @@ const clientThemeCode = `
 `;
 
 function NonFlashOfWrongThemeEls({ ssrTheme }: { ssrTheme: boolean }) {
-  const [theme] = useTheme();
+  const [theme] = useColorTheme();
 
   return (
     <>
@@ -112,10 +113,8 @@ function NonFlashOfWrongThemeEls({ ssrTheme }: { ssrTheme: boolean }) {
   );
 }
 
-const themes: Array<Theme> = Object.values(Theme);
-
 function isTheme(value: unknown): value is Theme {
   return typeof value === "string" && themes.includes(value as Theme);
 }
 
-export { isTheme, NonFlashOfWrongThemeEls, Theme, ThemeProvider, useTheme };
+export { isTheme, NonFlashOfWrongThemeEls, Theme, ThemeProvider, useColorTheme };

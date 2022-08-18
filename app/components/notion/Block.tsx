@@ -18,7 +18,7 @@ import Highlight, { defaultProps, Language } from "prism-react-renderer";
 
 import { Fragment } from "react";
 import { RichText } from "./Text";
-import { Theme, useTheme } from "~/utils/theme.provider";
+import { Theme, useColorTheme } from "~/utils/theme-provider";
 import { CodeHighlighter } from "../CodeHighlight";
 
 export function RenderPage({ blocks }: { blocks: BlockObjectResponse[] }) {

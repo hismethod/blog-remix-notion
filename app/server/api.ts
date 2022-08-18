@@ -50,8 +50,8 @@ export async function getBlogPostInfoList(): Promise<PostInfo[]> {
       title: title,
       url: url,
       coverUrl: coverUrl,
-      created_at: new Date(created_time),
-      updated_at: new Date(last_edited_time),
+      created_at: created_time,
+      updated_at: last_edited_time,
     };
     postInfoList.push(pageInfo);
   }

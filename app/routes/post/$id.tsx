@@ -6,7 +6,7 @@ import { getBlogPost } from "~/server/api";
 import cache from "~/server/cache";
 import prismOneDark from "~/styles/prism.one.dark.css";
 import prismOneLight from "~/styles/prism.one.light.css";
-import { emojiFavigonUri } from "~/utils";
+import { emojiFavigonDataUri } from "~/utils";
 
 export const headers: HeadersFunction = ({ loaderHeaders, parentHeaders }) => {
   return {
@@ -17,7 +17,7 @@ export const headers: HeadersFunction = ({ loaderHeaders, parentHeaders }) => {
 export const links: LinksFunction = () => {
   const favicon: HtmlLinkDescriptor = {
     rel: "icon",
-    href: emojiFavigonUri(""),
+    href: emojiFavigonDataUri(""),
   };
 
   const prismOneThemeStyleSheets = [

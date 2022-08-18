@@ -1,12 +1,12 @@
 import { Link } from "@remix-run/react";
 import { MdOutlineLightMode, MdDarkMode } from "react-icons/md";
-import { Theme, useTheme } from "~/utils/theme.provider";
+import { Theme, useColorTheme } from "~/utils/theme-provider";
 import Logo from "../Logo";
 
 export default function Header() {
   return (
-    <nav className="sticky top-0 w-full backdrop-blur flex-none bg-white/50 dark:bg-black/50">
-      <div className="relative flex items-center justify-between py-4">
+    <nav className="sticky top-0 backdrop-grayscale bg-white/95 dark:bg-black/50">
+      <div className="relative h-16 flex flex-row items-center justify-between py-4">
         <Logo />
         <div className="relative flex items-center space-x-4">
           <Link to="/about">
@@ -15,6 +15,8 @@ export default function Header() {
           <Link to="/post">
             <span>블로그</span>
           </Link>
+        </div>
+        <div>
           <AppColorThemeSwitcher />
         </div>
       </div>
@@ -23,7 +25,7 @@ export default function Header() {
 }
 
 function AppColorThemeSwitcher() {
-  const [colorTheme, setColorTheme] = useTheme();
+  const [colorTheme, setColorTheme] = useColorTheme();
   const toggleTheme = () => setColorTheme((prevTheme) => (prevTheme === Theme.LIGHT ? Theme.DARK : Theme.LIGHT));
   const iconSize = 24;
 

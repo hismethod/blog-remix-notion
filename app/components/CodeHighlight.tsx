@@ -7,12 +7,12 @@ type StyleObj = {
 
 export function CodeHighlighter({ children, language, theme, showLineNumber }: { children: string; language: Language; theme?: PrismTheme; showLineNumber: boolean }) {
   const Pre = ({ children, className, style }: { children: ReactNode; className: string; style: StyleObj }) => (
-    <pre className={`text-left my-12 p-2 overflow-x-scroll ${className}`} style={style}>
+    <pre className={className} style={style}>
       {children}
     </pre>
   );
   const Line = ({ children }: { children: ReactNode }) => <div className="table-row">{children}</div>;
-  const LineNo = ({ children }: { children: ReactNode }) => <span className="table-cell text-right pr-3 select-none opacity-50">{children}</span>;
+  const LineNo = ({ children }: { children: ReactNode }) => <span className="table-cell text-left pr-4 leading-normal select-none opacity-50">{children}</span>;
   const LineContent = ({ children }: { children: ReactNode }) => <span className="table-cell">{children}</span>;
 
   return (

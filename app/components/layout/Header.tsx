@@ -5,10 +5,10 @@ import Logo from "../Logo";
 
 export default function Header() {
   return (
-    <nav className="sticky top-0 backdrop-grayscale bg-white/95 dark:bg-black/50">
-      <div className="relative h-16 flex flex-row items-center justify-between py-4">
+    <nav className="sticky top-0 px-10 backdrop-blur border-b-2 bg-white/90 dark:bg-black/90">
+      <div className="container relative h-16 flex flex-row items-center justify-between py-4">
         <Logo />
-        <div className="relative flex items-center space-x-4">
+        <div className="relative flex mx-auto text-xl items-center space-x-4">
           <Link to="/about">
             <span>About</span>
           </Link>

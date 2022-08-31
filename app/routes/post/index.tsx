@@ -33,7 +33,7 @@ type LoaderData = {
 export default function PostIndex() {
   return (
     <div className="container mx-auto max-w-3xl">
-      <h1 className="text-7xl mb-16">포스팅</h1>
+      <h1 className="text-7xl mb-16">블로그</h1>
       <ArticleList />
     </div>
   );

@@ -18,7 +18,7 @@ import Highlight, { defaultProps, Language } from "prism-react-renderer";
 
 import { Fragment } from "react";
 import { RichText } from "./Text";
-import { Theme, useColorTheme } from "~/utils/theme-provider";
+import { useColorTheme } from "~/utils/theme-provider";
 import { CodeHighlighter } from "../CodeHighlight";
 
 export function RenderPage({ blocks }: { blocks: BlockObjectResponse[] }) {
@@ -188,7 +188,7 @@ function NotionCode({ block }: { block: CodeBlockObjectResponse }) {
 
 /** @deprecated */
 function NotionCodeOld({ block }: { block: CodeBlockObjectResponse }) {
-  const [colorTheme] = useTheme();
+  const [colorTheme] = useColorTheme();
   return (
     <Highlight
       {...defaultProps}

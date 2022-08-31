@@ -32,5 +32,5 @@ export function getDateString(epochString: string,
   const day = days[date.getDay()];
   const dayString = shortDay ? ` (${day})` : ` ${day}요일`;
 
-  return `${year}년 ${mm}월 ${dd}일${showDay ? dayString : ''}`;
+  return `${mm}월 ${dd}일${showDay ? dayString : ''} ${year}년 `;
 }

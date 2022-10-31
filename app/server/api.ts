@@ -1,8 +1,15 @@
 import { Client, collectPaginatedAPI, isFullBlock, isFullPage, iteratePaginatedAPI } from "@notionhq/client";
-import { BlockObjectResponse, GetBlockResponse, ListBlockChildrenResponse, PartialBlockObjectResponse, TextRichTextItemResponse } from "@notionhq/client/build/src/api-endpoints";
+import {
+  BlockObjectResponse,
+  GetBlockResponse,
+  ListBlockChildrenResponse,
+  PartialBlockObjectResponse,
+  TextRichTextItemResponse,
+  TitlePropertyItemObjectResponse,
+} from "@notionhq/client/build/src/api-endpoints";
 import { PostInfo } from "./model/post";
-import { findTitleKey } from "./notion.utils";
-const print = console.log;
+import { findTitleKey, getSlugKey } from "./notion.utils";
+
 const [NOTION_OLD_VERSION, NOTION_LATEST_VERSION] = ["2022-02-22", "2022-06-28"];
 const notion = new Client({
   auth: process.env.NOTION_API_TOKEN,
@@ -17,10 +24,12 @@ async function getBlogDatabase() {
 
   const database = await notionOld.databases.query({
     database_id: process.env.NOTION_BLOG_DATABASE_ID as string,
-    sorts: [{
-          timestamp: "created_time",
-          direction: "ascending"
-    }],
+    sorts: [
+      {
+        timestamp: "created_time",
+        direction: "ascending",
+      },
+    ],
   });
 
   return database;
@@ -28,21 +37,26 @@ async function getBlogDatabase() {
 
 export async function getBlogPostInfoList(): Promise<PostInfo[]> {
   const database = await getBlogDatabase();
-  const pages = database.results;
-  if(pages.length === 0) {
+  const pages = database.results.filter(isFullPage);
+
+  if (pages.length === 0) {
     return [];
   }
+
   const titleKey = findTitleKey(pages[0].properties);
+  const slugKey = getSlugKey();
+
   let postInfoList: PostInfo[] = [];
   for (const page of pages) {
-    if(!isFullPage(page)) {
+    if (!isFullPage(page)) {
       continue;
     }
-    const {id, url, icon, created_time, last_edited_time, cover, properties} = page;
-    const titleProps = page.properties[titleKey].title as Array<TextRichTextItemResponse>;
+    const { id, url, icon, created_time, last_edited_time, cover, properties } = page;
+    const titleProps = properties[titleKey].title as Array<TextRichTextItemResponse>;
     const title = titleProps[0]?.text.content ?? "제목없음";
+    const slug = slugKey in properties ? properties[slugKey].url : "";
     let coverUrl = null;
-    if(cover) {
+    if (cover) {
       coverUrl = cover[cover.type].url;
     }
     const pageInfo = {
@@ -76,34 +90,30 @@ async function getBlocks(id: string) {
 
 export async function getBlogPost(id: string) {
   let blockResponse = await notion.blocks.children.list({ block_id: id, page_size: 100 });
-  let blocks = [
-    ...await deepFetchAllChildren(blockResponse.results)
-  ];
+  let blocks = [...(await deepFetchAllChildren(blockResponse.results))];
 
   while (blockResponse.has_more && blockResponse.next_cursor) {
     blockResponse = await notion.blocks.children.list({
       block_id: id,
       page_size: 100,
-      start_cursor: blockResponse.next_cursor
+      start_cursor: blockResponse.next_cursor,
     });
 
-    blocks = [...blocks, ...await deepFetchAllChildren(blockResponse.results)];
+    blocks = [...blocks, ...(await deepFetchAllChildren(blockResponse.results))];
   }
 
   return blocks;
 }
 
-async function deepFetchAllChildren (blocks: GetBlockResponse[]): Promise<BlockObjectResponse[]> {
+async function deepFetchAllChildren(blocks: GetBlockResponse[]): Promise<BlockObjectResponse[]> {
   const fetchChildrenMap = blocks
-  .filter(block => block.has_children)
-  .map(block => (
-    {
+    .filter((block) => block.has_children)
+    .map((block) => ({
       promise: notion.blocks.children.list({ block_id: block.id!, page_size: 100 }),
-      parent_block: block
-    }
-  ));
+      parent_block: block,
+    }));
 
-  const results = await Promise.all(fetchChildrenMap.map(value => value.promise));
+  const results = await Promise.all(fetchChildrenMap.map((value) => value.promise));
 
   for (let i = 0; i < results.length; i++) {
     const childBlocks = results[i].results;
@@ -114,4 +124,4 @@ async function deepFetchAllChildren (blocks: GetBlockResponse[]): Promise<BlockO
     }
   }
   return blocks.filter(isFullBlock);
-};
+}

@@ -2,6 +2,7 @@ export interface PostInfo {
   id: string;
   title: string;
   url: string;
+  slug?: string;
   coverUrl: string | null;
   created_at: string;
   updated_at: string;

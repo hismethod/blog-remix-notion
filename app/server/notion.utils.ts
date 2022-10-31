@@ -1,7 +1,5 @@
-import { TitlePropertyItemObjectResponse } from "@notionhq/client/build/src/api-endpoints";
-
-export const findTitleKey = (properties: Record<string, TitlePropertyItemObjectResponse>) => {
-  if(properties != null) { 
+export const findTitleKey = (properties: Record<string, any>) => {
+  if (properties != null) {
     for (const key in properties) {
       if (properties[key].id === "title") {
         return key;
@@ -9,4 +7,6 @@ export const findTitleKey = (properties: Record<string, TitlePropertyItemObjectR
     }
   }
   return "이름";
-}
+};
+
+export const getSlugKey = () => "slug";
